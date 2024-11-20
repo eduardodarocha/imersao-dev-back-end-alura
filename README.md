@@ -1,5 +1,5 @@
 # Imersão Dev Back-End - Alura
-Cinco aulas de desenvolvimento Back-end, criando um projeto com Node.js na prática e desvendando APIs e Servidores com o Google Gemini. O projeto consiste em um blog de fotos
+Cinco aulas de desenvolvimento Back-end, criando um projeto com Node.js na prática e desvendando APIs e Servidores com o Google Gemini. O projeto consiste em um blog de fotos chamado Instalike.
 
 ## Aula 01 - Desvendando APIs e Servidores
 
