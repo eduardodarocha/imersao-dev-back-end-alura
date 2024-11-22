@@ -4,7 +4,7 @@ Cinco aulas de desenvolvimento Back-end, criando um projeto com Node.js na prát
 ## Aula 01 - Desvendando APIs e Servidores
 
 1. Introdução ao Projeto
-#### O projeto desenvolvido é uma aplicação inspirada na rede social "Instabytes", que inicialmente é uma página estática. O projeto tem servico de back-end e front-end, e a API do back-end deve ser consumida pelo front-end.
+  #### O projeto desenvolvido é uma aplicação inspirada na rede social "Instabytes", que inicialmente é uma página estática. O projeto tem servico de back-end e front-end, e a API do back-end deve ser consumida pelo front-end.
 
 2. Preparação do Ambiente
    - Instalação do Node.js:
@@ -142,13 +142,114 @@ Cinco aulas de desenvolvimento Back-end, criando um projeto com Node.js na prát
       });
       ```
 
-15. Servidor escutando na porta 3000
+14. Servidor escutando na porta 3000
     - Para executar o servidor, e não precisar restartar, use o comando:
     
        `node --watch server.js` 
 
-16. Preparação para Banco de Dados
+15. Preparação para Banco de Dados
     - Crie um conta ou faça login no [MongoDB Atlas](https://www.mongodb.com/products/platform/atlas-database)
     - Dê uma nome para seu banco de dados/projeto
     - Guarde o nome de usuário e a senha do seu banco de dados
-    - Crie um cluster e faca deploy
+    - Crie um cluster e faça o deploy.
+
+***
+***
+
+## Aula 03 - Conectando sua API ao MongoDB: Estrutura, Conexão e Refatoração
+
+16. Instalar pacote do Driver para se comunicar com o MongoDB
+
+`npm install mongodb`
+
+17. Criar banco de dados e collections no Mongodb Atlas
+    - Acesse o [MongoDB Atlas](https://www.mongodb.com/products/platform/atlas-database)
+    - Crie um banco de dados chamado imersao-instabytes
+    - Crie uma collection chamada posts
+    - Adicione dois ou mais posts / documentos.
+       - Estrutura dos Documentos:
+         - id: Identificador único do post.
+         - descricao: Uma descrição do post.
+         - imgUrl: URL da imagem associada ao post.
+         - alt: Texto alternativo para a imagem, importante para 
+
+18.  Criar arquivo de variáveis de ambiente
+    - Crie um arquivo .env e adicione a seguinte variável de ambiente no arquivo:
+      - `STRING_CONEXAO = mongodb+srv://<username>:<db_password>@cluster0.0oapm.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0`
+      - Adicionando ao .gitignore o arquivo .env
+
+19. Modificar script no package.json
+     - Adicione o seguinte script ao package.json:
+       - `"dev": "node --watch --env-file =.env server.js"`,
+       - Agora para startar o servidor, use o seguinte comando:
+         - `npm run dev`
+
+20.  Reorganização do código
+     - A estrutura do projeto foi organizada em várias pastas para separar responsabilidades:
+       - src: Contém o código fonte da aplicação e outras pastas,
+       - src/config: Armazena configurações, como a conexão com o banco de dados,
+       - src/routes: Define as rotas da aplicação, onde as requisições são recebidas,
+       - src/controllers: Gerencia a lógica de requisições e respostas,
+       - src/models: Interage com o banco de dados, realizando operações como buscar e inserir dados.
+
+21.  Conexão com o Banco de Dados    
+     - Criar uma função chamada conectarAoBanco no arquivo src/config/dbconfig.js para estabelecer a conexão com o MongoDB usando a string de conexão armazenada na variável de ambiente.
+ 
+  ```
+  import { MongoClient } from 'mongodb';
+
+  export default async function conectarAoBanco(stringConexao) {
+  let mongoClient;
+
+  try {
+    mongoClient = new MongoClient(stringConexao);
+    console.log('Conectando ao cluster do banco de dados...');
+    await mongoClient.connect();
+    console.log('Conectado ao MongoDB Atlas com sucesso!');
+
+    return mongoClient;
+    } catch (erro) {
+      console.error('Falha na conexão com o banco!', erro);
+      process.exit();
+      }
+  }
+  ``` 
+
+22.  Rotas
+    - As rotas foram movidas para src/routes/postsRoutes.js
+   ```
+   import express from "express";
+   import { listarPosts } from "../controllers/postsController.js";
+
+   const routes = (app) => {
+   app.use(express.json());
+
+   app.get("/posts", listarPosts);
+
+  };
+  ``` 
+
+23.  Controllers
+    - Os controllers foram movidos para src/controllers/postsController.js
+  
+   ```
+   export async function listarPosts(req, res) { 
+  const posts = await getTodosPosts();
+  res.status(200).json(posts);  
+   }
+   ```
+
+24.  Models
+    - Os models foram movidos para src/models/postsModel.js
+  
+   ```
+  import conectarAoBanco from "../config/dbConfig.js";
+
+  const conexao = await conectarAoBanco(process.env.STRING_CONEXAO);
+
+  export default async function getTodosPosts() {
+  const db = conexao.db("imersao-instabytes");
+  const colecao = db.collection("posts");
+  return colecao.find().toArray();
+  }
+   ```
