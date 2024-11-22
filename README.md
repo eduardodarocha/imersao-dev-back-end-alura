@@ -253,3 +253,87 @@ Cinco aulas de desenvolvimento Back-end, criando um projeto com Node.js na prát
   return colecao.find().toArray();
   }
    ```
+
+## Aula 4 - Implementando Armazenamento e Upload de Imagens
+
+25. Criar uma rota POST para enviar dados (posts)
+  	  
+    ```
+    import { postarNovoPost } from '../controllers/postsController.js';
+    app.post('/posts', postarNovoPost);
+    ```
+
+26. Manipulação de Requisições
+    - Como acessar o corpo da requisição usando req.body e como tratar exceções com try e catch para evitar que o sistema trave em caso de erro. Criar em postsController.js :
+   ```
+    import { criarPost } from '../models/postsModel.js';
+
+    export const postarNovoPost = async (req, res) => {
+      try {
+        const novoPost = req.body; // Acessando o corpo da requisição
+        const postCriado = await criarPost(novoPost); // Chamando a função do modelo
+        res.status(200).json(postCriado); // Retornando o post criado
+      } catch (erro) {
+          console.error(erro.message);
+          res.status(500).json({ erro: "Falha na requisição" });
+      }
+    };
+   ``` 
+
+27. Criar a função criarPost
+    - Criar a função no modelo para inserir novos posts no banco de dados:
+  
+    ```
+    export async function criarPost(post) {
+    // Obtém o banco de dados "imersao-instabytes" a partir da conexão.
+    const db = conexao.db("imersao-instabytes");
+    // Obtém a coleção "posts" dentro do banco de dados.
+    const colecao = db.collection("posts");
+    // Insere o novo post na coleção "posts" e retorna o resultado da operação.
+    return colecao.insertOne(post);
+    }
+    ```
+
+28. Testando com o plugin do VSCode Thunder Client
+    - Para testar a criação de novos posts, utilizamos o Thunder Client. A requisição POST foi feita para a rota /posts com um corpo em JSON, como:
+     ```              
+    {
+      "descricao": "Gato fazendo um post",
+      "url": "https://example.com/imagem.png",
+      "alt": "Imagem de um gato"
+    }
+     ```
+
+29. Upload de Imagens (local)
+    - A biblioteca multer foi utilizada para gerenciar o upload de imagens
+    `npm install multer`
+
+    - A rota para upload é criada assim:
+
+    ```
+    import { uploadImagem } from '../controllers/postsController.js';
+    import multer from 'multer';
+
+    const upload = multer({ dest: './uploads' });
+    app.post('/upload', upload.single('imagem'), uploadImagem);
+    ```
+
+30. Renomeando Arquivos no upload
+     - Após o upload, renomeamos o arquivo de imagem com o ID gerado pelo banco de dados. O código para renomear o arquivo no arquivo postsController.js:
+     ```
+     import fs from 'fs';
+
+     export const uploadImagem = async (req, res) => {
+         try {
+             const postCriado = await criarPost(req.body); // Criando o post
+             const caminhoAntigo = req.file.path; // Caminho do arquivo original
+             const novoCaminho = `./uploads/${postCriado.insertedId}.png`; // Novo caminho com ID
+     
+             fs.renameSync(caminhoAntigo, novoCaminho); // Renomeando o arquivo
+             res.status(200).json(postCriado); // Retornando o post criado
+         } catch (erro) {
+             console.error(erro.message);
+             res.status(500).json({ erro: "Falha na requisição" });
+         }
+     };
+     ```

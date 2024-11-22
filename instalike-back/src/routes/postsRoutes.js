@@ -30,6 +30,7 @@ const routes = (app) => {
   app.post("/posts", postarNovoPost)
 
   app.post("/upload", upload.single("imagem"), uploadImagem)
+  app.put("/upload/:id", upload.single("imagem"), uploadImagem)
 };
 
 
