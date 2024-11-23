@@ -7,6 +7,8 @@ const corsOptions = {
   origin: "http://localhost:8000",
   optionsSuccessStatus: 200
 }
+
+
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
     // Especifica o diretório para armazenar as imagens enviadas
