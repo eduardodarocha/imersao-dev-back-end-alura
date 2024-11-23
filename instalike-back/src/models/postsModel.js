@@ -1,3 +1,4 @@
+import { ObjectId } from "mongodb";
 import conectarAoBanco from "../config/dbConfig.js";
 
 // Cria uma conexão com o banco de dados MongoDB usando as informações da string de conexão fornecida. 
@@ -23,13 +24,15 @@ export async function criarPost(post) {
   return colecao.insertOne(post);
 };
 
-export async function atualizarPost(id, post) {
+export async function atualizarPost(id, novoPost) {
   // Obtém o banco de dados "imersao-instabytes" a partir da conexão.
   const db = conexao.db("imersao-instabytes");
   // Obtém a coleção "posts" dentro do banco de dados.
   const colecao = db.collection("posts");
 
-  const objId = ObjectId.createFromHexString(id);
+  // Converte o ID hexadecimal em um objeto ObjectId do MongoDB.
+  // O ObjectId é o tipo de dado padrão para IDs de documentos no MongoDB.
+  const objID = ObjectId.createFromHexString(id);
   // Insere o novo post na coleção "posts" e retorna o resultado da operação.
-  return colecao.updateOne(id, post);
+  return colecao.updateOne({ _id: new ObjectId(objID) }, { $set: novoPost });
 }
