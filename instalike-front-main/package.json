@@ -2,6 +2,10 @@
   "name": "",
   "version": "1.0.0",
   "description": "",
+  "main": "index.js",
+  "targets": {
+    "main": false
+  },
   "type": "module",
   "license": "AGPL-version-3.0",
   "private": false,
